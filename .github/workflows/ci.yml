@@ -24,5 +24,24 @@ jobs:
       - name: Debug Installed Packages
         run: pip freeze  # This will print installed packages in the logs
 
+      - name: Debug File Encoding and Line Endings
+        run: |
+          file main.py
+          cat -A main.py
+
+      - name: Ensure Unix Line Endings
+        run: |
+          git config --global core.autocrlf input
+          git checkout -- .
+
+      - name: Debug Python Execution
+        run: python -v main.py
+
+      - name: Run Tests
+        run: pytest
+
+      - name: Debug Installed Packages
+        run: pip freeze  # This will print installed packages in the logs
+
       - name: Run Tests
         run: pytest
