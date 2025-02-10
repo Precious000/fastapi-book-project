@@ -21,6 +21,8 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+      - name: Debug Installed Packages
+        run: pip freeze  # This will print installed packages in the logs
+
       - name: Run Tests
         run: pytest
-
