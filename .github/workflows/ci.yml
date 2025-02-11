@@ -39,4 +39,4 @@ jobs:
             echo "Starting new container..."
             docker run -d -p 8000:8000 --restart always --name fastapi-app fastapi-app
 
-            sudo systemctl restart nginx
+            sudo systemctl restart nginxs
