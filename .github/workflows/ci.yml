@@ -40,3 +40,4 @@ jobs:
             docker run -d -p 8000:8000 --restart always --name fastapi-app fastapi-app
 
             sudo systemctl restart nginx
+# Triggering CI run
