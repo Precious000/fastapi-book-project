@@ -45,7 +45,7 @@ jobs:
             sudo systemctl restart nginx
 
             echo "Deployment complete. Verifying that /stage2 is NOT accessible..."
-            if curl -f http://localhost:8000/stage2; then
+            if curl -f http://54.208.55.71:8000/api/v1/stage2/; then
               echo "❌ Error: /stage2 should not exist!"
               exit 1
             else
