@@ -37,4 +37,3 @@ jobs:
             echo "❌ Error: /stage2 route is missing!"
             exit 1
           fi
-
