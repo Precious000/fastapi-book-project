@@ -2,30 +2,21 @@ name: CI Pipeline
 
 on:
   pull_request:
-  push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v3
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
-
+          python-version: '3.11'
       - name: Install dependencies
-        run: pip install flake8 requests uvicorn fastapi
-
-      - name: Ensure /stage2 Route Does NOT Exist Initially
         run: |
-          STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}" http://54.208.55.71:8000/api/v1/stage2/)
-          if [ "$STATUS_CODE" -ne 404 ]; then
-            echo "❌ Error: Expected 404 for missing /stage2 route, but got $STATUS_CODE"
-            exit 1
-          fi
-          echo "✅ /stage2 correctly returned 404 before deployment."
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run tests
+        run: |
+          pytest
