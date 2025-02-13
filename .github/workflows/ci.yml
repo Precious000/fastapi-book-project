@@ -31,12 +31,19 @@ jobs:
           echo "Running flake8 linter..."
           flake8 main.py || { echo "❌ Linter errors found!"; exit 1; }
 
-      - name: Ensure /stage2 Route Does NOT Exist Initially
+      - name: Start FastAPI Server
+        run: uvicorn main:app --host 127.0.0.1 --port 8000 &  # Start server in background
+        timeout-minutes: 1
+
+      - name: Ensure /stage2 Always Returns 404
         run: |
-          if grep -q '@app.get("/stage2")' main.py; then
-            echo "❌ Error: /stage2 route should not exist initially!"
+          sleep 2  # Give server time to start
+          response=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/stage2)
+          if [ "$response" -ne 404 ]; then
+            echo "❌ Error: /stage2 must return 404, but got $response"
             exit 1
           fi
+          echo "✅ /stage2 correctly returned 404"
 
       - name: Run Tests
         run: pytest test_stage2.py  # Running test file
