@@ -19,7 +19,7 @@ jobs:
           python-version: "3.10"
 
       - name: Install dependencies
-        run: pip install flake8 pytest httpx  # Added pytest and httpx for testing
+        run: pip install flake8 pytest httpx  # Added httpx for testing
 
       - name: Run Syntax Check
         run: |
@@ -39,10 +39,9 @@ jobs:
           fi
 
       - name: Run Tests
-        run: pytest test_stage2.py  # Added step to execute test_stage2.py
+        run: pytest test_stage2.py  # Running test file
 
       - name: Ensure /stage2 Route Exists After Deployment
-        if: always()
         run: |
           if ! grep -q '@app.get("/stage2")' main.py; then
             echo "❌ Error: /stage2 route is missing after deployment!"
