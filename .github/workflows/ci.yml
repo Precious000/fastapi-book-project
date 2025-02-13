@@ -31,12 +31,6 @@ jobs:
           echo "Running flake8 linter..."
           flake8 main.py || { echo "❌ Linter errors found!"; exit 1; }
 
-      - name: Start FastAPI Server
-        run: |
-          echo "Starting FastAPI server..."
-          uvicorn main:app --host 0.0.0.0 --port 8000 &  # Ensure it runs in the background
-          sleep 5  # Give it time to start
-
       - name: Ensure /stage2 Route Does NOT Exist Initially
         run: |
           STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:8000/stage2)
@@ -55,9 +49,3 @@ jobs:
             exit 1
           fi
           echo "✅ /stage2 correctly returned 200 after deployment."
-
-      - name: Stop FastAPI Server
-        if: always()
-        run: |
-          echo "Stopping FastAPI server..."
-          pkill uvicorn || echo "FastAPI server was not running."
