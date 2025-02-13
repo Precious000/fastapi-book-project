@@ -19,7 +19,7 @@ jobs:
           python-version: "3.10"
 
       - name: Install dependencies
-        run: pip install flake8 requests
+        run: pip install flake8 requests uvicorn fastapi
 
       - name: Run Syntax Check
         run: |
@@ -33,22 +33,31 @@ jobs:
 
       - name: Start FastAPI Server
         run: |
-          uvicorn main:app --host 127.0.0.1 --port 8000 &
-          sleep 5
+          echo "Starting FastAPI server..."
+          uvicorn main:app --host 0.0.0.0 --port 8000 &  # Ensure it runs in the background
+          sleep 5  # Give it time to start
 
       - name: Ensure /stage2 Route Does NOT Exist Initially
         run: |
-          STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}" http://127.0.0.1:8000/stage2)
+          STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:8000/stage2)
           if [ "$STATUS_CODE" -ne 404 ]; then
             echo "❌ Error: Expected 404 for missing /stage2 route, but got $STATUS_CODE"
             exit 1
           fi
+          echo "✅ /stage2 correctly returned 404 before deployment."
 
       - name: Ensure /stage2 Route Exists After Deployment
         if: always()
         run: |
-          STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}" http://127.0.0.1:8000/stage2)
+          STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:8000/stage2)
           if [ "$STATUS_CODE" -ne 200 ]; then
             echo "❌ Error: Expected 200 for /stage2 route after deployment, but got $STATUS_CODE"
             exit 1
           fi
+          echo "✅ /stage2 correctly returned 200 after deployment."
+
+      - name: Stop FastAPI Server
+        if: always()
+        run: |
+          echo "Stopping FastAPI server..."
+          pkill uvicorn || echo "FastAPI server was not running."
