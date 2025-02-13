@@ -23,5 +23,3 @@ async def health_check():
     return {"status": "precious might be cooking"}
 
 
-
-
