@@ -22,17 +22,6 @@ jobs:
             cd fastapi-book-project
             git pull origin main
 
-            echo "Ensuring /stage2 route exists in main.py..."
-            if ! grep -q '@app.get("/stage2")' main.py; then
-              echo 'Adding /stage2 route back to main.py...'
-              echo '@app.get("/stage2")' >> main.py
-              echo 'async def stage2():' >> main.py
-              echo '    return {"message": "welcome to stage 2"}' >> main.py
-              git add main.py
-              git commit -m "Ensure /stage2 route persists"
-              git push origin main
-            fi
-
             echo "Building Docker image..."
             docker build -t fastapi-app .
 
@@ -55,5 +44,10 @@ jobs:
             echo "Restarting Nginx..."
             sudo systemctl restart nginx
 
-            echo "Deployment complete. Checking if /stage2 is reachable..."
-            curl -f http://localhost:8000/stage2 || echo "Error: /stage2 not found!"
+            echo "Deployment complete. Verifying that /stage2 is NOT accessible..."
+            if curl -f http://localhost:8000/stage2; then
+              echo "❌ Error: /stage2 should not exist!"
+              exit 1
+            else
+              echo "✅ /stage2 correctly returns 404 Not Found."
+            fi
