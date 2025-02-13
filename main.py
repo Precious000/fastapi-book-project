@@ -25,3 +25,5 @@ async def health_check():
 @app.get("/stage")
 def get_stage():
     return {"message": "Stage endpoint is working fine!"}
+
+
