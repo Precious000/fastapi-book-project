@@ -36,6 +36,11 @@ jobs:
             echo "Removing old Docker images (if any)..."
             docker system prune -f
 
+            echo "Ensuring /stage2 route exists..."
+            echo '@app.get("/stage2")' >> main.py
+            echo 'async def stage2():' >> main.py
+            echo '    return {"message": "Welcome to stage 2"}' >> main.py
+
             echo "Starting new container..."
             docker run -d -p 8000:8000 --name fastapi-app fastapi-app
 
