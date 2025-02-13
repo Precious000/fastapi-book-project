@@ -21,30 +21,39 @@ jobs:
           script: |
             cd fastapi-book-project
             git pull origin main
+
+            echo "Ensuring /stage2 route exists in main.py..."
+            if ! grep -q '@app.get("/stage2")' main.py; then
+              echo 'Adding /stage2 route back to main.py...'
+              echo '@app.get("/stage2")' >> main.py
+              echo 'async def stage2():' >> main.py
+              echo '    return {"message": "welcome to stage 2"}' >> main.py
+              git add main.py
+              git commit -m "Ensure /stage2 route persists"
+              git push origin main
+            fi
+
+            echo "Building Docker image..."
             docker build -t fastapi-app .
 
             echo "Checking for running containers..."
-            docker ps  
+            docker ps  # Debugging step to see running containers
 
             echo "Stopping and removing existing container if it exists..."
             docker stop fastapi-app || true
-            docker rm -f fastapi-app || true  
+            docker rm -f fastapi-app || true  # Force remove if needed
 
             echo "Ensuring no process is using port 8000..."
-            sudo fuser -k 8000/tcp || true  
+            sudo fuser -k 8000/tcp || true  # Kill any process using port 8000
 
-            echo "Removing unused Docker images..."
-            docker image prune -af  
-
-            echo "Ensuring /stage2 route exists..."
-            if ! grep -q '@app.get("/stage2")' main.py; then
-              echo '@app.get("/stage2")' >> main.py
-              echo 'async def stage2():' >> main.py
-              echo '    return {"message": "Welcome to stage 2"}' >> main.py
-            fi
+            echo "Removing old Docker images (if any)..."
+            docker system prune -f
 
             echo "Starting new container..."
-            docker run -d --rm -p 8000:8000 --name fastapi-app fastapi-app
+            docker run -d -p 8000:8000 --name fastapi-app fastapi-app
 
             echo "Restarting Nginx..."
             sudo systemctl restart nginx
+
+            echo "Deployment complete. Checking if /stage2 is reachable..."
+            curl -f http://localhost:8000/stage2 || echo "Error: /stage2 not found!"
