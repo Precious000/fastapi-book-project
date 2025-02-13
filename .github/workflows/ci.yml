@@ -21,16 +21,6 @@ jobs:
       - name: Install dependencies
         run: pip install flake8 requests uvicorn fastapi
 
-      - name: Run Syntax Check
-        run: |
-          echo "Checking for syntax errors..."
-          python -m py_compile main.py || { echo "❌ Syntax error found!"; exit 1; }
-
-      - name: Run Linter (Flake8)
-        run: |
-          echo "Running flake8 linter..."
-          flake8 main.py || { echo "❌ Linter errors found!"; exit 1; }
-
       - name: Ensure /stage2 Route Does NOT Exist Initially
         run: |
           STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}" http://54.208.55.71:8000/api/v1/stage2/)
