@@ -38,7 +38,7 @@ jobs:
       - name: Ensure /stage2 Always Returns 404
         run: |
           sleep 2  # Give server time to start
-          response=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/stage2)
+          response=$(curl -s -o /dev/null -w "%{http_code}" http:/127.0.0.1/:8000/api/v1/stage2/)
           if [ "$response" -ne 404 ]; then
             echo "❌ Error: /stage2 must return 404, but got $response"
             exit 1
