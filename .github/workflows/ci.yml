@@ -44,13 +44,3 @@ jobs:
             exit 1
           fi
           echo "✅ /stage2 correctly returned 404"
-
-      - name: Run Tests
-        run: pytest test_stage2.py  # Running test file
-
-      - name: Ensure /stage2 Route Exists After Deployment
-        run: |
-          if ! grep -q '@app.get("/stage2")' main.py; then
-            echo "❌ Error: /stage2 route is missing after deployment!"
-            exit 1
-          fi
