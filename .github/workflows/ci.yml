@@ -31,9 +31,17 @@ jobs:
           echo "Running flake8 linter..."
           flake8 main.py || { echo "❌ Linter errors found!"; exit 1; }
 
-      - name: Ensure /stage2 Route Exists
+      - name: Ensure /stage2 Route Does NOT Exist Initially
+        run: |
+          if grep -q '@app.get("/stage2")' main.py; then
+            echo "❌ Error: /stage2 route should not exist initially!"
+            exit 1
+          fi
+
+      - name: Ensure /stage2 Route Exists After Deployment
+        if: always()
         run: |
           if ! grep -q '@app.get("/stage2")' main.py; then
-            echo "❌ Error: /stage2 route is missing!"
+            echo "❌ Error: /stage2 route is missing after deployment!"
             exit 1
           fi
