@@ -1,57 +1,40 @@
-name: Deploy Pipeline
+name: CI Pipeline
 
 on:
+  pull_request:
   push:
     branches:
       - main
 
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Validate Code
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install flake8
+
+      - name: Run Syntax Check
+        run: |
+          echo "Checking for syntax errors..."
+          python -m py_compile main.py || { echo "❌ Syntax error found!"; exit 1; }
+
+      - name: Run Linter (Flake8)
+        run: |
+          echo "Running flake8 linter..."
+          flake8 main.py || { echo "❌ Linter errors found!"; exit 1; }
+
+      - name: Ensure /stage2 Route Exists
         run: |
           if ! grep -q '@app.get("/stage2")' main.py; then
-            echo "Error: /stage2 route is missing!"
+            echo "❌ Error: /stage2 route is missing!"
             exit 1
           fi
 
-      - name: Connect to AWS EC2 and Deploy
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.AWS_HOST }}
-          username: ubuntu
-          key: ${{ secrets.AWS_PRIVATE_KEY }}
-          script: |
-            cd fastapi-book-project
-            git pull origin main
-            docker build -t fastapi-app .
-
-            echo "Checking for running containers..."
-            docker ps  # Debugging step to see running containers
-
-            echo "Stopping and removing existing container if it exists..."
-            docker stop fastapi-app || true
-            docker rm -f fastapi-app || true  # Force remove if needed
-
-            echo "Ensuring no process is using port 8000..."
-            sudo fuser -k 8000/tcp || true  # Kill any process using port 8000
-
-            echo "Removing old Docker images (if any)..."
-            docker system prune -f
-
-            echo "Ensuring /stage2 route exists..."
-            if ! grep -q '@app.get("/stage2")' main.py; then
-              echo '@app.get("/stage2")' >> main.py
-              echo 'async def stage2():' >> main.py
-              echo '    return {"message": "Welcome to stage 2"}' >> main.py
-            fi
-
-            echo "Starting new container..."
-            docker run -d -p 8000:8000 --name fastapi-app fastapi-app
-
-            echo "Restarting Nginx..."
-            sudo systemctl restart nginx
