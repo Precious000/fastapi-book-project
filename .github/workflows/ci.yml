@@ -33,7 +33,7 @@ jobs:
 
       - name: Ensure /stage2 Route Does NOT Exist Initially
         run: |
-          STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}" http://localhost:8000/stage2)
+          STATUS_CODE=$(curl -o /dev/null -s -w "%{http_code}" http://54.208.55.71:8000/api/v1/stage2/)
           if [ "$STATUS_CODE" -ne 404 ]; then
             echo "❌ Error: Expected 404 for missing /stage2 route, but got $STATUS_CODE"
             exit 1
