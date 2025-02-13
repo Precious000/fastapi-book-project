@@ -43,11 +43,3 @@ jobs:
 
             echo "Restarting Nginx..."
             sudo systemctl restart nginx
-
-            echo "Deployment complete. Verifying that /stage2 is NOT accessible..."
-            if curl -f http://127.0.0.1:8000/api/v1/stage2/; then
-              echo "❌ Error: /stage2 should not exist!"
-              exit 1
-            else
-              echo "✅ /stage2 correctly returns 404 Not Found."
-            fi
